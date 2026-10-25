@@ -1,0 +1,57 @@
+{
+  "name": "@bos/eeb-satz",
+  "version": "0.0.0",
+  "description": "Ausgabe des Einheiten-Erfassungsbogens ohne Oberfläche: PDF-Satz (pdfmake-Dokumentdefinition), CSV, XLSX im Format Oldenburg, QR-Gruppierung mehrteiliger Bögen, QR aus PDF-Bildobjekten.",
+  "license": "EUPL-1.2",
+  "author": {
+    "name": "Johannes Rudolph",
+    "email": "johannes.rudolph@thw-oldenburg.de"
+  },
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --reporter=verbose",
+    "lint": "eslint ."
+  },
+  "peerDependencies": {
+    "@bos/eeb-format": "*",
+    "@bos/meldekopf": "*",
+    "@bos/taktische-zeichen": "*",
+    "@bos/vokabulare": "*"
+  },
+  "devDependencies": {
+    "@bos/eeb-format": "file:../eeb-format",
+    "@bos/meldekopf": "file:../bos-meldekopf",
+    "@bos/taktische-zeichen": "file:../bos-taktische-zeichen",
+    "@bos/vokabulare": "file:../bos-vokabulare",
+    "@eslint/js": "^10.0.1",
+    "@types/pdfmake": "^0.3.3",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "eslint": "^10.10.0",
+    "jsdom": "^29.1.1",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "typescript-eslint": "^8.70.0",
+    "vitest": "^4.1.10"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wattnpapa/bos-eeb-satz.git"
+  }
+}
