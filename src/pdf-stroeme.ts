@@ -1,7 +1,7 @@
 /**
  * Herkunft: Erfassungsbogen `src/app/pdf-stroeme.ts` (Commit 441811c). Geändert:
  * Die Länge eines Stroms kommt aus `/Length`, wo die PDF sie direkt nennt
- * (siehe pdfStroeme).
+ * (siehe pdfStroeme), und das Entpacken hat einen Deckel (siehe entpackt).
  *
  * Rohzugriff auf die Datenströme einer PDF — bewusst OHNE PDF-Parser-
  * Abhängigkeit. Unsere eigenen PDFs tragen ihre Nutzdaten als eingebettete
@@ -14,7 +14,7 @@
  * als Rückfallebene, wenn eine PDF kein JSON mitbringt).
  */
 
-import { inflate } from "pako";
+import { Inflate } from "pako";
 
 export interface PdfStrom {
   /** Das Wörterbuch vor `stream` als Text — grob, aber genug für /Filter & Co. */
@@ -86,11 +86,47 @@ function direkteLaenge(woerterbuch: string): number | null {
   return m ? Number(m[1]) : null;
 }
 
-/** Strom entpacken (FlateDecode); null, wenn er nicht Flate-komprimiert ist. */
-export function entpackt(strom: PdfStrom): Uint8Array | null {
+/**
+ * Höchstens so viele Bytes liefert ein einzelner Strom entpackt. Die größten
+ * eigenen Ströme sind die eingebettete Sammlung (wenige MiB auch bei Hunderten
+ * Einheiten) und QR-Bilder als Rohpixel (unter 4 MiB); 32 MiB lassen dafür
+ * reichlich Luft und halten eine präparierte PDF auf, die aus wenigen
+ * Kilobyte Gigabyte macht.
+ */
+export const MAX_STROM_ENTPACKT = 32 * 1024 * 1024;
+
+/**
+ * Strom entpacken (FlateDecode); null, wenn er nicht Flate-komprimiert ist
+ * oder entpackt größer als `grenze` würde. pako liefert stückweise, die
+ * Prüfung greift also, bevor der Speicher voll ist (wie `inflateRawBegrenzt`
+ * im Erfassungsbogen, `hilfen.ts`).
+ */
+export function entpackt(strom: PdfStrom, grenze = MAX_STROM_ENTPACKT): Uint8Array | null {
+  const inflater = new Inflate();
+  const stuecke: Uint8Array[] = [];
+  let summe = 0;
+  let zuGross = false;
+  inflater.onData = (stueck: Uint8Array) => {
+    summe += stueck.length;
+    if (summe > grenze) {
+      zuGross = true;
+      throw new RangeError("Strom zu groß");
+    }
+    stuecke.push(stueck);
+  };
   try {
-    return inflate(strom.daten);
+    inflater.push(strom.daten, true);
   } catch {
     return null;
   }
+  if (zuGross || inflater.err) return null;
+  // pako meldet einen abgeschnittenen Strom nicht als Fehler, sondern hört auf.
+  if (!inflater.ended) return null;
+  const ergebnis = new Uint8Array(summe);
+  let stelle = 0;
+  for (const stueck of stuecke) {
+    ergebnis.set(stueck, stelle);
+    stelle += stueck.length;
+  }
+  return ergebnis;
 }

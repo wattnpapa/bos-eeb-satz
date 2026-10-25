@@ -58,3 +58,24 @@ describe("pdfStroeme()", () => {
     expect([...strom!.daten]).toEqual([7, 8, 9]);
   });
 });
+
+describe("entpackt()", () => {
+  it("liefert null, wenn der Strom entpackt über die Grenze wächst", () => {
+    const gross = deflate(new Uint8Array(1024 * 1024)); // 1 MiB Nullen, gepackt rund 1 KiB
+    const [strom] = pdfStroeme(pdf(`/Length ${gross.length} /Filter /FlateDecode`, gross));
+    expect(entpackt(strom!, 64 * 1024)).toBeNull();
+    expect(entpackt(strom!)?.length).toBe(1024 * 1024);
+  });
+
+  it("liefert null für einen abgeschnittenen Strom", () => {
+    const gepackt = deflate(kodierer.encode("x".repeat(5000) + Math.random()));
+    const halb = gepackt.subarray(0, Math.floor(gepackt.length / 2));
+    const [strom] = pdfStroeme(pdf(`/Length ${halb.length}`, halb));
+    expect(entpackt(strom!)).toBeNull();
+  });
+
+  it("liefert null für Daten, die gar nicht Flate-komprimiert sind", () => {
+    const [strom] = pdfStroeme(pdf("/Length 4", new Uint8Array([1, 2, 3, 4])));
+    expect(entpackt(strom!)).toBeNull();
+  });
+});
