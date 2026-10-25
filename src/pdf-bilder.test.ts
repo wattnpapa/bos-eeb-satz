@@ -93,6 +93,19 @@ describe("bilderAusPdfBytes()", () => {
     expect(bilderAusPdfBytes(streifen)).toEqual([]);
   });
 
+  it("legt für ein übergroß angegebenes Bild keinen Puffer an", () => {
+    // 3000 × 3000 Graustufen im Schachbrett; die Daten reichen dafür (9 MB,
+    // gepackt wenige KiB) und wären sonst ein gültiges Bild. Ein QR-Bild
+    // dieser Größe gibt es nicht.
+    const muster = new Uint8Array(3000 * 3000);
+    for (let i = 0; i < muster.length; i += 2) muster[i] = 255;
+    const riese = pdfMitBild(
+      "/Subtype /Image\n/Width 3000\n/Height 3000\n/BitsPerComponent 8\n/Filter /FlateDecode\n/ColorSpace /DeviceGray",
+      deflate(muster),
+    );
+    expect(bilderAusPdfBytes(riese)).toEqual([]);
+  });
+
   it("übergeht die einfarbige Alphamaske, die pdfkit neben jedes QR-Bild legt", () => {
     const kante = 520;
     const maske = new Uint8Array(kante * kante);

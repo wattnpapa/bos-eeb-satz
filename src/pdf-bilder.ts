@@ -1,5 +1,5 @@
 /**
- * Herkunft: Erfassungsbogen `src/app/pdf-bilder.ts` (Commit 441811c), unverändert.
+ * Herkunft: Erfassungsbogen `src/app/pdf-bilder.ts` (Commit 441811c). Geändert: Bildgröße und Gesamtmenge begrenzt.
  *
  * Bild-Objekte aus einer PDF als Pixel — die Grundlage dafür, den QR-Code einer
  * PDF auszuwerten (siehe pdf-qr.ts), ohne einen PDF-Renderer einzubinden
@@ -16,6 +16,12 @@
  */
 
 import { entpackt, pdfStroeme, type PdfStrom } from "./pdf-stroeme";
+
+/** Höchstens so viele Bildpunkte hat ein Bild, das als QR-Code in Frage kommt (2000 × 2000). */
+export const MAX_BILDPUNKTE = 4_000_000;
+
+/** Höchstens so viele RGBA-Bytes behält {@link bilderAusPdfBytes} über alle Bilder zusammen. */
+export const MAX_BILDER_RGBA = 256 * 1024 * 1024;
 
 /** Ein Bild aus der PDF als RGBA-Puffer, wie ihn ImageData erwartet. */
 export interface PdfBild {
@@ -80,6 +86,9 @@ function bildAusStrom(strom: PdfStrom): PdfBild | null {
   const breite = zahl(w, "Width");
   const hoehe = zahl(w, "Height");
   if (!breite || !hoehe || zahl(w, "BitsPerComponent") !== 8) return null;
+  // Größer wird kein QR-Bild, das sich noch lesen ließe; ein präpariertes
+  // /Width × /Height soll hier keine Hunderte MiB RGBA anlegen.
+  if (breite * hoehe > MAX_BILDPUNKTE) return null;
   const grau = w.includes("/DeviceGray");
   const kanaele = grau ? 1 : w.includes("/DeviceRGB") ? 3 : 0;
   if (!kanaele) return null;
@@ -109,12 +118,19 @@ function bildAusStrom(strom: PdfStrom): PdfBild | null {
  */
 export function bilderAusPdfBytes(bytes: Uint8Array): PdfBild[] {
   const bilder: PdfBild[] = [];
+  // Gesamtbudget der behaltenen Bilder: Der Deckel je Strom allein hielte eine
+  // PDF mit sehr vielen großen Bildern nicht auf.
+  let rest = MAX_BILDER_RGBA;
   for (const strom of pdfStroeme(bytes)) {
+    if (rest <= 0) break;
     // Ein QR-Bild ist quadratisch, nicht winzig und nicht einfarbig. Das siebt
     // Logos, Schriftgrafiken und vor allem die Alphamaske aus, die pdfkit zu
     // jedem QR-Bild als zweites, durchweg deckendes Graustufenbild ablegt.
     const bild = bildAusStrom(strom);
-    if (bild && bild.breite === bild.hoehe && bild.breite >= 100 && !einfarbig(bild)) bilder.push(bild);
+    if (bild && bild.breite === bild.hoehe && bild.breite >= 100 && !einfarbig(bild)) {
+      bilder.push(bild);
+      rest -= bild.rgba.length;
+    }
   }
   return bilder;
 }
