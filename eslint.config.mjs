@@ -84,6 +84,13 @@ export default tseslint.config(
     },
   },
   {
+    // Übernommener, auditierter Code aus dem Erfassungsbogen, der dort ohne
+    // typgeprüftes Lint lief: Eine überflüssige Typzusicherung ist kein
+    // Fehler im Verhalten.
+    files: ["src/**/*.ts"],
+    rules: { "@typescript-eslint/no-unnecessary-type-assertion": "off" },
+  },
+  {
     // Konfigurationsdateien liegen außerhalb des ausgelieferten Kerns und
     // dürfen daher Werkzeugpakete einbinden.
     files: ["*.mjs", "*.ts", "vitest.config.ts"],

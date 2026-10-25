@@ -34,7 +34,8 @@
     "@bos/eeb-format": "*",
     "@bos/meldekopf": "*",
     "@bos/taktische-zeichen": "*",
-    "@bos/vokabulare": "*"
+    "@bos/vokabulare": "*",
+    "pako": "^2.2.0"
   },
   "devDependencies": {
     "@bos/eeb-format": "file:../eeb-format",
@@ -42,10 +43,12 @@
     "@bos/taktische-zeichen": "file:../bos-taktische-zeichen",
     "@bos/vokabulare": "file:../bos-vokabulare",
     "@eslint/js": "^10.0.1",
+    "@types/pako": "^2.0.4",
     "@types/pdfmake": "^0.3.3",
     "@typescript/native": "npm:typescript@^7.0.2",
     "eslint": "^10.10.0",
     "jsdom": "^29.1.1",
+    "pako": "^2.2.0",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "typescript-eslint": "^8.70.0",
     "vitest": "^4.1.10"
