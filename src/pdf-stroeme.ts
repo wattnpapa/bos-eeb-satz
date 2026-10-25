@@ -1,5 +1,7 @@
 /**
- * Herkunft: Erfassungsbogen `src/app/pdf-stroeme.ts` (Commit 441811c), unverändert.
+ * Herkunft: Erfassungsbogen `src/app/pdf-stroeme.ts` (Commit 441811c). Geändert:
+ * Die Länge eines Stroms kommt aus `/Length`, wo die PDF sie direkt nennt
+ * (siehe pdfStroeme).
  *
  * Rohzugriff auf die Datenströme einer PDF — bewusst OHNE PDF-Parser-
  * Abhängigkeit. Unsere eigenen PDFs tragen ihre Nutzdaten als eingebettete
@@ -44,23 +46,44 @@ export function pdfStroeme(bytes: Uint8Array): PdfStrom[] {
   let m: RegExpExecArray | null;
   while ((m = re.exec(latin1))) {
     const start = m.index + m[0].length;
-    const ende = latin1.indexOf("endstream", start);
-    if (ende < 0) continue;
-    // Vor „endstream" steht i. d. R. ein Zeilenumbruch, der nicht zum Strom gehört.
-    let bis = ende;
-    if (latin1[bis - 1] === "\n") bis--;
-    if (latin1[bis - 1] === "\r") bis--;
     const fenster = latin1.slice(Math.max(0, m.index - 800), m.index);
     const kopf = /\d+\s+\d+\s+obj\b/g;
     let letzter = -1;
     let k: RegExpExecArray | null;
     while ((k = kopf.exec(fenster))) letzter = k.index + k[0].length;
-    stroeme.push({
-      woerterbuch: letzter >= 0 ? fenster.slice(letzter) : fenster,
-      daten: bytes.subarray(start, bis),
-    });
+    const woerterbuch = letzter >= 0 ? fenster.slice(letzter) : fenster;
+    let bis: number;
+    // Mit /Length weiß die PDF selbst, wo die Daten enden. Ohne diese Angabe
+    // schnitt die Suche nach „endstream" den Zeilenumbruch davor ab — und
+    // endete ein komprimierter Strom zufällig auf dem Byte 0x0D, dazu ein
+    // Datenbyte: Entpacken scheiterte, rund jede 256. Sammel-PDF ließ sich
+    // nicht einlesen (gefunden 2026-10-25 an einem gelegentlich roten Test).
+    const laenge = direkteLaenge(woerterbuch);
+    if (laenge != null && /^\s*endstream/.test(latin1.slice(start + laenge, start + laenge + 16))) {
+      bis = start + laenge;
+      re.lastIndex = bis; // die Daten selbst nicht nach „stream" durchsuchen
+    } else {
+      const ende = latin1.indexOf("endstream", start);
+      if (ende < 0) continue;
+      // Vor „endstream" steht i. d. R. ein Zeilenumbruch, der nicht zum Strom
+      // gehört. Ohne /Length bleibt das eine Annahme (s. o.).
+      bis = ende;
+      if (latin1[bis - 1] === "\n") bis--;
+      if (latin1[bis - 1] === "\r") bis--;
+    }
+    stroeme.push({ woerterbuch, daten: bytes.subarray(start, bis) });
   }
   return stroeme;
+}
+
+/**
+ * `/Length 1234` aus dem Wörterbuch — nur als direkte Zahl. Eine indirekte
+ * Angabe (`/Length 12 0 R`) zeigt auf ein anderes Objekt; dann bleibt es bei
+ * der Suche nach „endstream".
+ */
+function direkteLaenge(woerterbuch: string): number | null {
+  const m = /\/Length\s+(\d+)(?!\s+\d+\s+R)/.exec(woerterbuch);
+  return m ? Number(m[1]) : null;
 }
 
 /** Strom entpacken (FlateDecode); null, wenn er nicht Flate-komprimiert ist. */
