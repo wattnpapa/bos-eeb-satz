@@ -26,8 +26,9 @@ Beide binden das Paket über `"@bos/eeb-satz": "file:vendor/bos-eeb-satz"` ein.
 
 | Modul | Was | Stand |
 |---|---|---|
-| `csv` | Formatgrundlagen: Semikolon, UTF-8-BOM, Dezimalkomma, Formel-Schutz | übernommen |
-| `xlsx` | minimaler XLSX-Schreiber (ADR-001 des Erfassungsbogens) | übernommen |
+| `csv` | Formatgrundlagen: Semikolon, UTF-8-BOM, Dezimalkomma, Formel-Schutz, Spalte „NACHTRAG“ | übernommen (Stand Erfassungsbogen `1d7ed5f`) |
+| `typografie` | `anfuehrung`: schließende Anführungszeichen „…“ an den Datei-Senken | übernommen (2026-11-09, ohne den DOM-Wächter) |
+| `xlsx` | minimaler XLSX-Schreiber (ADR-001 des Erfassungsbogens) | übernommen; seit dem Wegfall der Oldenburg-Liste ohne Aufrufer in den Apps, bleibt nach Regel 4 stehen |
 | `pdf-stroeme`, `pdf-bilder` | Ströme und Bildobjekte einer PDF roh lesen, ohne Renderer (ADR-006 des Erfassungsbogens) | übernommen |
 | `taktische-zeichen-bogen` | Zeichen aus einem konkreten Bogen auflösen | übernommen |
 | `uebung-wasserzeichen` | Wasserzeichen „ÜBUNG" | übernommen |
@@ -35,7 +36,7 @@ Beide binden das Paket über `"@bos/eeb-satz": "file:vendor/bos-eeb-satz"` ein.
 | `qr-boegen` | QR-Texte zu vollständigen Bögen gruppieren; hängt an `qr-stapel` der App | offen |
 | `pdf-dokument`, `blanko` | pdfmake-Dokumentdefinition: Einzel-PDF, Sammel-PDF, Lageblatt, Probesatz, Kopfzeile je Seite, WinAnsi-Abbildung; hängt an `auswertung`, `einheiten-tabelle`, `eintrag-zeiten`, `hilfen`, `org-farben` | offen |
 | `bogen-csv`, `einsatz-csv` | CSV-Langformat mit Satzart-Spalte, Übersichts-CSV; hängen zusätzlich an `export-stand`, `fassung-vorrang` | offen |
-| `oldenburg-xlsx` | 38 Spalten der Oldenburger Vorlage; wie die CSV | offen |
+| `oldenburg-xlsx` | 38 Spalten der Oldenburger Vorlage | entfällt: Der Erfassungsbogen hat die Excel-Liste am 2026-11-03 gestrichen, die Meldekopf-App am 2026-11-09 |
 
 **Nicht hier:** QR-Bild erzeugen, PDF rendern, Download, Vorschau. Das ist
 plattformabhängig und bleibt in den Apps (`pdf.ts`). Dieser Baustein baut die

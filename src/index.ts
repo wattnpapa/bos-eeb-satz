@@ -6,12 +6,12 @@
  * Abschnitt B). Die Module kommen mit ihren Tests und Kopfkommentaren aus
  * `src/app/` des Erfassungsbogens (Commit 441811c). Erste Stufe:
  *
- *   csv, xlsx
+ *   csv, xlsx, typografie (reiner Teil)
  *   pdf-bilder, pdf-stroeme
  *   taktische-zeichen-bogen, uebung-wasserzeichen
  *
  * Später (hängen im Erfassungsbogen noch an App-Modulen, s. README):
- *   pdf-dokument, blanko, bogen-csv, einsatz-csv, oldenburg-xlsx,
+ *   pdf-dokument, blanko, bogen-csv, einsatz-csv,
  *   qr-boegen, pdf-qr
  *
  * Importiert wird modulgenau (`@bos/eeb-satz/pdf-dokument`), nicht über diese

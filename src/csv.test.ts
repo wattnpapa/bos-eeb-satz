@@ -2,7 +2,7 @@
  * Herkunft: Erfassungsbogen `src/app/csv.test.ts` (Commit 441811c), unverändert.
  */
 import { describe, expect, it } from "vitest";
-import { csvFeld, csvZeile } from "./csv";
+import { csvFeld, csvZeile, mitNachtragSpalte } from "./csv";
 
 describe("csvFeld", () => {
   it("lässt harmlosen Text unangetastet", () => {
@@ -35,5 +35,9 @@ describe("csvFeld", () => {
 
   it("csvZeile verbindet Felder mit dem Trenner", () => {
     expect(csvZeile(["a", "=b", 3])).toBe("a;'=b;3");
+  });
+
+  it("mitNachtragSpalte stellt den Datenzeilen „NACHTRAG“ voran, Summen- und Schlusszeilen bleiben leer", () => {
+    expect(mitNachtragSpalte(["Kopf;A", "x;1", "y;2", "Summe;3"], "Teil", 2)).toEqual(["Teil;Kopf;A", "NACHTRAG;x;1", "NACHTRAG;y;2", ";Summe;3"]);
   });
 });
