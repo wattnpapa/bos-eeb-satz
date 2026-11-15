@@ -11,7 +11,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { OrganisationsTyp, type Einheit } from "@bos/eeb-format/model";
+import { OrganisationsTyp, type Einheit, type Person } from "@bos/eeb-format/model";
 import { THW_EINHEITSTYPEN, THW_FAHRZEUGTYPEN } from "@bos/vokabulare/thw";
 import { THW_EINHEIT_ZEICHEN, THW_FAHRZEUG_ZEICHEN } from "@bos/taktische-zeichen/zeichen";
 import { TZ_SYMBOLE } from "@bos/taktische-zeichen/symbole";
@@ -68,5 +68,26 @@ describe("einheitSymbolSvg()", () => {
       einheit({ organisation: OrganisationsTyp.FEUERWEHR, einheitsTyp: { freitext: "Löschzug" } }),
     );
     expect(s).toBe(TZ_SYMBOLE["Feuerwehr_Einheiten/Löschzug"]);
+  });
+});
+
+describe("einheitSymbolSvg() für eine Einzelperson", () => {
+  const einzel = (e: Partial<Einheit>): Einheit =>
+    ({ organisation: OrganisationsTyp.THW, hierarchie: [], einzelperson: true, ...e }) as Einheit;
+
+  it("zeichnet die Raute mit der Aufschrift der Funktion statt einer Formation", () => {
+    const s = einheitSymbolSvg(einzel({ einheitsTyp: { freitext: "Baufachberater/in" } }));
+    expect(s).toContain("M64,128 L128,64 L192,128 L128,192 Z");
+    expect(s).toContain(">BFB</text>");
+  });
+
+  it("nimmt die Funktion der Person, wenn das Personal mitgegeben wird", () => {
+    const person = { funktionen: [{ code: 344 }] } as Person;
+    expect(einheitSymbolSvg(einzel({ einheitsTyp: { freitext: "egal" } }), [person])).toContain(">TeBe</text>");
+  });
+
+  it("bleibt ohne das Kennzeichen bei der Formation", () => {
+    const s = einheitSymbolSvg(einzel({ einzelperson: undefined, einheitsTyp: { freitext: "Baufachberater/in" } }));
+    expect(s).not.toContain(">BFB</text>");
   });
 });
