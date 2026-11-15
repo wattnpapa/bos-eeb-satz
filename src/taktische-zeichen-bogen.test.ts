@@ -20,9 +20,12 @@ import { einheitSymbolSvg, fahrzeugSymbolSvg } from "./taktische-zeichen-bogen";
 describe("Zuordnung Vokabular → Zeichen", () => {
   it("ordnet jedem THW-Vokabular-Eintrag ein Zeichen zu (oder bewusst keins)", () => {
     // Neue Vokabular-Codes sollen nicht unbemerkt ohne Zuordnung bleiben. Die
-    // vier Fahrzeugtypen ohne eigenes Zeichen sind gewollt.
+    // Fahrzeugtypen ohne eigenes Zeichen sind gewollt: Auflieger und Anhänger
+    // in Bauformen, die die Sammlung nur als nackten Anhänger kennt, sowie
+    // Wechselbrücke und Abrollbehälter Kraftstoff. Sie bekommen das
+    // Grundzeichen mit ihrem Kurzzeichen (siehe THW_FAHRZEUG_ZEICHEN).
     const ohneZeichen = THW_FAHRZEUGTYPEN.filter((t) => !THW_FAHRZEUG_ZEICHEN[t.code!]).map((t) => t.kurz);
-    expect(ohneZeichen).toEqual(["Auflieger", "Anh Plane/Spriegel", "Anh BDF", "Anh ASH"]);
+    expect(ohneZeichen).toEqual(["Auflieger", "Auflieger Plane/Spriegel", "Auflieger Container", "Anh Plane/Spriegel", "Anh BDF", "Anh ASH", "Anh 12t Koffer", "Anh 5t Tandem", "WB", "ABK"]);
     expect(THW_EINHEITSTYPEN.filter((t) => !THW_EINHEIT_ZEICHEN[t.code!])).toEqual([]);
   });
 });
