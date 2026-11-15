@@ -33,7 +33,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: wattnpapa/eeb-format
-          ref: ef2e63242f1d456389278b5f186bb453b450a8d2
+          ref: f845f6db04144b652acbab724c27f28967e66e6d
           path: eeb-format
       - uses: actions/checkout@v4
         with:
@@ -43,12 +43,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: wattnpapa/bos-taktische-zeichen
-          ref: 6354ff861f0071b003a089de5ab4976a215fcb00
+          ref: bf4b7fcf596461b1dab444df62aa67bec16907d1
           path: bos-taktische-zeichen
       - uses: actions/checkout@v4
         with:
           repository: wattnpapa/bos-meldekopf
-          ref: 59100af124f7d1c1630fb154aa189a946f11a0a3
+          ref: f784ce0fe764916e3cb5ff967e1814556cf2a076
           path: bos-meldekopf
       - uses: actions/setup-node@v4
         with:
